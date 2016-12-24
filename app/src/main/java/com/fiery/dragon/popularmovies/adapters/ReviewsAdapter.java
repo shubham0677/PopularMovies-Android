@@ -1,6 +1,8 @@
 package com.fiery.dragon.popularmovies.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,20 +22,24 @@ public class ReviewsAdapter
             extends RecyclerView.Adapter<ReviewsAdapter.ViewHolder> {
 
         private List<Review> mReviews;
+        final Context context;
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
-            public final TextView mAuthorTextView;
-            public final TextView mReviewTextView;
+            public final View mView;
+            TextView mAuthorTextView;
+            TextView mContentTextView;
 
             public ViewHolder(View view) {
                 super(view);
+                mView = view;
                 mAuthorTextView = (TextView) view.findViewById(R.id.author_text_view);
-                mReviewTextView = (TextView) view.findViewById(R.id.review_text_view);
+                mContentTextView = (TextView) view.findViewById(R.id.content_text_view);
             }
 
         }
 
         public ReviewsAdapter(Context context, List<Review> items) {
+            this.context = context;
             mReviews = items;
         }
 
@@ -46,10 +52,17 @@ public class ReviewsAdapter
 
         @Override
         public void onBindViewHolder(final ReviewsAdapter.ViewHolder holder, int position) {
-            Review review = (Review) mReviews.get(position);
+            final Review review = mReviews.get(position);
 
             holder.mAuthorTextView.setText(review.getAuthor());
-            holder.mReviewTextView.setText(review.getContent());
+            holder.mContentTextView.setText(review.getContent());
+
+            holder.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(review.getUrl())));
+                }
+            });
 
         }
 

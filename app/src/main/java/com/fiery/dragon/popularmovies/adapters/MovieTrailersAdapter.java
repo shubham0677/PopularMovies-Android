@@ -2,16 +2,20 @@ package com.fiery.dragon.popularmovies.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fiery.dragon.popularmovies.DetailFragment;
+import com.fiery.dragon.popularmovies.R;
 import com.fiery.dragon.popularmovies.models.Trailer;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -24,20 +28,14 @@ public class MovieTrailersAdapter  extends RecyclerView.Adapter<MovieTrailersAda
     private List<Trailer> mTrailers;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public String mTrailerSource;
-
         public final View mView;
-        public final TextView mTextView;
+        ImageView mThumbnailView;
+        public Trailer mTrailer;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mTextView = (TextView) view.findViewById(android.R.id.text1);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mTextView.getText();
+            mThumbnailView = (ImageView) view.findViewById(R.id.trailer_thumbnail);
         }
     }
 
@@ -46,24 +44,43 @@ public class MovieTrailersAdapter  extends RecyclerView.Adapter<MovieTrailersAda
     }
 
     @Override
-    public MovieTrailersAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_list_item_1, parent, false);
-        return new MovieTrailersAdapter.ViewHolder(view);
+                .inflate(R.layout.trailer_list_content, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final MovieTrailersAdapter.ViewHolder holder, int position) {
-        holder.mTrailerSource = mTrailers.get(position).getSource();
-        holder.mTextView.setText("Trailer " + (++position));
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final Trailer trailer = mTrailers.get(position);
+        final Context context = holder.mView.getContext();
+
+        float paddingLeft = 0;
+        if (position == 0) {
+            paddingLeft = context.getResources().getDimension(R.dimen.detail_horizontal_padding);
+        }
+
+        float paddingRight = 0;
+        if (position + 1 != getItemCount()) {
+            paddingRight = context.getResources().getDimension(R.dimen.detail_horizontal_padding) / 2;
+        }
+
+        holder.mView.setPadding((int) paddingLeft, 0, (int) paddingRight, 0);
+
+        holder.mTrailer = trailer;
+
+        String thumbnailUrl = "http://img.youtube.com/vi/" + trailer.getSource() + "/0.jpg";
+        Picasso.with(context)
+                .load(thumbnailUrl)
+                .config(Bitmap.Config.RGB_565)
+                .into(holder.mThumbnailView);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Context context = v.getContext();
                 context.startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://www.youtube.com/watch?v=" + holder.mTrailerSource)));
-                Snackbar.make(v, holder.mTrailerSource, Snackbar.LENGTH_SHORT).show();
+                        Uri.parse("http://www.youtube.com/watch?v=" + holder.mTrailer.getSource())));
+                Snackbar.make(v, holder.mTrailer.getSource(), Snackbar.LENGTH_SHORT).show();
             }
         });
     }
@@ -71,5 +88,9 @@ public class MovieTrailersAdapter  extends RecyclerView.Adapter<MovieTrailersAda
     @Override
     public int getItemCount() {
         return mTrailers.size();
+    }
+
+    public Trailer getFirstTrailer() {
+        return mTrailers.get(0);
     }
 }

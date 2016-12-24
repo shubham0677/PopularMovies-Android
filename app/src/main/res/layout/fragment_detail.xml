@@ -3,6 +3,7 @@
 <android.support.v4.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -61,6 +62,8 @@
                         android:fontFamily="sans-serif-condensed"
                         android:textAppearance="?android:textAppearanceMedium" />
 
+                    <include layout="@layout/favorite_buttons"/>
+
                 </LinearLayout>
 
             </LinearLayout>
@@ -82,8 +85,9 @@
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/trailers_list_view"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listItem="@layout/trailer_list_content"/>
 
             <TextView
                 android:id="@+id/title_reviews"
@@ -94,15 +98,6 @@
                 android:id="@+id/reviews_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/myFab"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:src="@drawable/ic_discuss"
-                android:layout_gravity="bottom|right|end"
-                android:layout_margin="@dimen/fab_margin"
-                android:clickable="true"/>
 
         </LinearLayout>
 

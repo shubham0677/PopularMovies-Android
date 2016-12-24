@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,9 +42,12 @@ import retrofit2.Response;
 
 public class DetailFragment extends Fragment {
 
+    private Movie mMovie;
+
     private ImageView moviePoster;
-    private RecyclerView mRecyclerView;
+    private RecyclerView mTrailersRecyclerView, mReviewsRecyclerView;
     private TextView movieTitle,movieReleaseDate,movieRating,movieSynopsis,reviewsTitle;
+    private Button mButtonAddToFavorites, mButtonRemoveFromFavorites;
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
 
     public DetailFragment() {
@@ -57,37 +61,7 @@ public class DetailFragment extends Fragment {
 
         Intent intent = getActivity().getIntent();
         Bundle args = intent.getExtras();
-        final Movie movie = (Movie) args.get("movie");
-
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.myFab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Cursor cursor = getContext().getContentResolver().query(
-                        FavoritesProvider.Favorites.CONTENT_URI,
-                        new String[]{FavoritesColumns._ID},
-                        FavoritesColumns.MOVIE_ID + " = ?",
-                        new String[]{Integer.toString(movie.getId())},
-                        null);
-
-                if(cursor.moveToFirst()) {
-                    Snackbar.make(view, "This movie is already in Favorites", Snackbar.LENGTH_SHORT).show();
-
-                }
-                else {
-                    ContentValues cv = new ContentValues();
-                    cv.put(FavoritesColumns.MOVIE_ID, movie.getId());
-                    cv.put(FavoritesColumns.NAME, movie.getOriginalTitle());
-                    cv.put(FavoritesColumns.POSTER, movie.getPosterPath());
-                    cv.put(FavoritesColumns.RELEASE_DATE, movie.getReleaseDate());
-                    cv.put(FavoritesColumns.RATING, movie.getVoteAverage());
-                    cv.put(FavoritesColumns.OVERVIEW, movie.getOverview());
-                    getActivity().getContentResolver().insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
-
-                    Snackbar.make(view, "Added to favorites" + movie.getOriginalTitle(), Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });
+        mMovie = (Movie) args.get("movie");
 
         moviePoster = (ImageView) rootView.findViewById(R.id.movie_poster_image);
         movieTitle = (TextView) rootView.findViewById(R.id.movie_title_text);
@@ -95,26 +69,38 @@ public class DetailFragment extends Fragment {
         movieRating = (TextView) rootView.findViewById(R.id.movie_rating_text);
         movieSynopsis = (TextView) rootView.findViewById(R.id.movie_synopsis_text);
         reviewsTitle = (TextView) rootView.findViewById(R.id.title_reviews);
+        mButtonAddToFavorites = (Button) rootView.findViewById(R.id.button_add_to_favorites);
+        mButtonRemoveFromFavorites =
+                (Button) rootView.findViewById(R.id.button_remove_from_favorites);
 
-        if(intent != null && intent.hasExtra("movie")) {
-
-            Log.d(LOG_TAG, movie.getPosterPath());
-
-            Picasso.with(getContext()).load(movie.getPosterPath()).into(moviePoster);
-            movieTitle.setText(movie.getOriginalTitle());
-            movieReleaseDate.setText(movie.getReleaseDate());
-            movieRating.setText(String.format(getString(R.string.format_movie_rating),movie.getVoteAverage()));
-            movieSynopsis.setText(movie.getOverview());
+        if(intent != null && intent.hasExtra("favorite")) {
+            Picasso.with(getContext()).load(mMovie.getPosterPath()).into(moviePoster);
+        }
+        else {
+            Picasso.with(getContext()).load(mMovie.getPosterUrl()).into(moviePoster);
         }
 
+        updateFavoriteButtons();
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_list_view);
-        mRecyclerView.setLayoutManager(
-                new LinearLayoutManager(mRecyclerView.getContext())
-        );
+        movieTitle.setText(mMovie.getOriginalTitle());
+        movieReleaseDate.setText(mMovie.getReleaseDate());
+        movieRating.setText(String.format(getString(R.string.format_movie_rating),mMovie.getVoteAverage()));
+        movieSynopsis.setText(mMovie.getOverview());
 
-        getTrailers(movie.getId());
-        getReviews(movie.getId());
+        mTrailersRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_list_view);
+        mReviewsRecyclerView = (RecyclerView) rootView.findViewById(R.id.reviews_list_view);
+
+        LinearLayoutManager layoutManager
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        mTrailersRecyclerView.setLayoutManager(layoutManager);
+        mTrailersRecyclerView.setNestedScrollingEnabled(false);
+
+        layoutManager
+                = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        mReviewsRecyclerView.setLayoutManager(layoutManager);
+
+        getTrailers(mMovie.getId());
+        getReviews(mMovie.getId());
 
         return rootView;
     }
@@ -140,12 +126,66 @@ public class DetailFragment extends Fragment {
 //        return super.onOptionsItemSelected(item);
 //    }
 
+    private void updateFavoriteButtons() {
+        if (isFavorite()) {
+            mButtonRemoveFromFavorites.setVisibility(View.VISIBLE);
+            mButtonAddToFavorites.setVisibility(View.GONE);
+        } else {
+            mButtonAddToFavorites.setVisibility(View.VISIBLE);
+            mButtonRemoveFromFavorites.setVisibility(View.GONE);
+        }
+        mButtonAddToFavorites.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        addToFavorites();
+                    }
+                });
+
+        mButtonRemoveFromFavorites.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        removeFromFavorites();
+                    }
+                });
+    }
+
+    private boolean isFavorite() {
+        Cursor cursor = getContext().getContentResolver().query(
+                FavoritesProvider.Favorites.CONTENT_URI,
+                new String[]{FavoritesColumns._ID},
+                FavoritesColumns.MOVIE_ID + " = ?",
+                new String[]{Integer.toString(mMovie.getId())},
+                null);
+        if(cursor.moveToFirst()) {
+            return true;
+        }
+        return false;
+    }
+
+    private void addToFavorites() {
+        ContentValues cv = new ContentValues();
+                    cv.put(FavoritesColumns.MOVIE_ID, mMovie.getId());
+                    cv.put(FavoritesColumns.NAME, mMovie.getOriginalTitle());
+                    cv.put(FavoritesColumns.POSTER, mMovie.getPosterUrl());
+                    cv.put(FavoritesColumns.RELEASE_DATE, mMovie.getReleaseDate());
+                    cv.put(FavoritesColumns.RATING, mMovie.getVoteAverage());
+                    cv.put(FavoritesColumns.OVERVIEW, mMovie.getOverview());
+                    getActivity().getContentResolver().insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
+                    updateFavoriteButtons();
+                    Snackbar.make(getView(), "Added to favorites" + mMovie.getOriginalTitle(), Snackbar.LENGTH_SHORT).show();
+    }
+
+    private  void removeFromFavorites() {
+        getContext().getContentResolver().delete(FavoritesProvider.Favorites.CONTENT_URI,
+                FavoritesColumns.MOVIE_ID + " = " + mMovie.getId(), null);
+        updateFavoriteButtons();
+    }
+
     private void getTrailers(int id) {
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<TrailersResponse> call = null;
-        /* -- */
-        Log.d(LOG_TAG,Integer.toString(id));
-        /* -- */
         call = apiService.getTrailers(id, BuildConfig.THE_MOVIE_DB_API_KEY);
         call.enqueue(new Callback<TrailersResponse>() {
             @Override
@@ -153,7 +193,7 @@ public class DetailFragment extends Fragment {
                 List<Trailer> trailersList = response.body().getResults();
                 MovieTrailersAdapter trailersAdapter =
                         new MovieTrailersAdapter(getActivity(), trailersList);
-                mRecyclerView.setAdapter(trailersAdapter);
+                mTrailersRecyclerView.setAdapter(trailersAdapter);
             }
 
             @Override
@@ -164,6 +204,9 @@ public class DetailFragment extends Fragment {
     }
 
     private void getReviews(int id) {
+
+        Log.d(LOG_TAG,Integer.toString(id));
+
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<ReviewsResponse> call = apiService.getReviews(id, BuildConfig.THE_MOVIE_DB_API_KEY);
         call.enqueue(new Callback<ReviewsResponse>() {
@@ -174,7 +217,7 @@ public class DetailFragment extends Fragment {
                     reviewsTitle.setText("Reviews");
                     ReviewsAdapter reviewsAdapter =
                             new ReviewsAdapter(getActivity(), reviewsList);
-                    mRecyclerView.setAdapter(reviewsAdapter);
+                    mReviewsRecyclerView.setAdapter(reviewsAdapter);
                 }
             }
 

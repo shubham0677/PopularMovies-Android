@@ -2,13 +2,16 @@ package com.fiery.dragon.popularmovies.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created by hp on 11/24/2016.
  */
 
 public class Review {
     @SerializedName("id")
-    private int id;
+    private String id;
 
     @SerializedName("author")
     private String author;
@@ -16,7 +19,10 @@ public class Review {
     @SerializedName("content")
     private String content;
 
-    public int getId() {
+    @SerializedName("url")
+    private String url;
+
+    public String getId() {
         return id;
     }
 
@@ -26,5 +32,9 @@ public class Review {
 
     public String getContent() {
         return content;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }
