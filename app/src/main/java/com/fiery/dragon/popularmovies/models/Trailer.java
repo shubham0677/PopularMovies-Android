@@ -20,4 +20,8 @@ public class Trailer {
     public String getSource() {
         return source;
     }
+
+    public String getUrl() {
+        return "http://www.youtube.com/watch?v=" + source;
+    }
 }

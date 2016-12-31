@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="http://schemas.android.com/tools">
+    <string name="format_movie_rating">Rating : <xliff:g id="rating">%1$.2f</xliff:g>/10 </string>
+</resources>

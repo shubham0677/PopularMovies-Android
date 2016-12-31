@@ -3,21 +3,25 @@ package com.fiery.dragon.popularmovies;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.fiery.dragon.popularmovies.adapters.MovieTrailersAdapter;
+import com.fiery.dragon.popularmovies.adapters.TrailersAdapter;
 import com.fiery.dragon.popularmovies.adapters.ReviewsAdapter;
 import com.fiery.dragon.popularmovies.apiService.ApiClient;
 import com.fiery.dragon.popularmovies.apiService.ApiInterface;
@@ -43,11 +47,14 @@ import retrofit2.Response;
 public class DetailFragment extends Fragment {
 
     private Movie mMovie;
+    private Trailer shareTrailer;
 
     private ImageView moviePoster;
     private RecyclerView mTrailersRecyclerView, mReviewsRecyclerView;
     private TextView movieTitle,movieReleaseDate,movieRating,movieSynopsis,reviewsTitle;
     private Button mButtonAddToFavorites, mButtonRemoveFromFavorites;
+    private ShareActionProvider mShareActionProvider;
+
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
 
     public DetailFragment() {
@@ -60,8 +67,7 @@ public class DetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         Intent intent = getActivity().getIntent();
-        Bundle args = intent.getExtras();
-        mMovie = (Movie) args.get("movie");
+        mMovie = intent.getParcelableExtra("movie");
 
         moviePoster = (ImageView) rootView.findViewById(R.id.movie_poster_image);
         movieTitle = (TextView) rootView.findViewById(R.id.movie_title_text);
@@ -73,18 +79,19 @@ public class DetailFragment extends Fragment {
         mButtonRemoveFromFavorites =
                 (Button) rootView.findViewById(R.id.button_remove_from_favorites);
 
-        if(intent != null && intent.hasExtra("favorite")) {
-            Picasso.with(getContext()).load(mMovie.getPosterPath()).into(moviePoster);
-        }
-        else {
-            Picasso.with(getContext()).load(mMovie.getPosterUrl()).into(moviePoster);
+        if(intent != null) {
+            if (intent.hasExtra("favorite")) {
+                Picasso.with(getContext()).load(mMovie.getPosterPath()).into(moviePoster);
+            } else {
+                Picasso.with(getContext()).load(mMovie.getPosterUrl()).into(moviePoster);
+            }
         }
 
         updateFavoriteButtons();
 
         movieTitle.setText(mMovie.getOriginalTitle());
-        movieReleaseDate.setText(mMovie.getReleaseDate());
         movieRating.setText(String.format(getString(R.string.format_movie_rating),mMovie.getVoteAverage()));
+        movieReleaseDate.setText(String.format(getString(R.string.format_release_date),mMovie.getFormattedReleaseDate()));
         movieSynopsis.setText(mMovie.getOverview());
 
         mTrailersRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_list_view);
@@ -105,26 +112,41 @@ public class DetailFragment extends Fragment {
         return rootView;
     }
 
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        inflater.inflate(R.menu.main, menu);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if(id==R.id.action_settings){
-//            Intent intent=new Intent(getActivity(),SettingsActivity.class);
-//            startActivity(intent);
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.detailfragment, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        if(shareTrailer != null) {
+            mShareActionProvider.setShareIntent(createShareTrailerIntent());
+        }
+    }
+
+    private Intent createShareTrailerIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT,mMovie.getOriginalTitle());
+        shareIntent.putExtra(Intent.EXTRA_TEXT,shareTrailer.getName() + ": " + shareTrailer.getUrl());
+        return shareIntent;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if(id==R.id.action_settings){
+            Intent intent=new Intent(getActivity(),SettingsActivity.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     private void updateFavoriteButtons() {
         if (isFavorite()) {
@@ -168,13 +190,13 @@ public class DetailFragment extends Fragment {
         ContentValues cv = new ContentValues();
                     cv.put(FavoritesColumns.MOVIE_ID, mMovie.getId());
                     cv.put(FavoritesColumns.NAME, mMovie.getOriginalTitle());
-                    cv.put(FavoritesColumns.POSTER, mMovie.getPosterUrl());
+                    cv.put(FavoritesColumns.POSTER, mMovie.getPosterPath());
                     cv.put(FavoritesColumns.RELEASE_DATE, mMovie.getReleaseDate());
                     cv.put(FavoritesColumns.RATING, mMovie.getVoteAverage());
                     cv.put(FavoritesColumns.OVERVIEW, mMovie.getOverview());
                     getActivity().getContentResolver().insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
                     updateFavoriteButtons();
-                    Snackbar.make(getView(), "Added to favorites" + mMovie.getOriginalTitle(), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(getView(), "Added to favorites", Snackbar.LENGTH_SHORT).show();
     }
 
     private  void removeFromFavorites() {
@@ -191,9 +213,11 @@ public class DetailFragment extends Fragment {
             @Override
             public void onResponse(Call<TrailersResponse> call, Response<TrailersResponse> response) {
                 List<Trailer> trailersList = response.body().getResults();
-                MovieTrailersAdapter trailersAdapter =
-                        new MovieTrailersAdapter(getActivity(), trailersList);
+                shareTrailer = trailersList.get(0);
+                TrailersAdapter trailersAdapter =
+                        new TrailersAdapter(getActivity(), trailersList);
                 mTrailersRecyclerView.setAdapter(trailersAdapter);
+                mShareActionProvider.setShareIntent(createShareTrailerIntent());
             }
 
             @Override
@@ -204,10 +228,7 @@ public class DetailFragment extends Fragment {
     }
 
     private void getReviews(int id) {
-
-        Log.d(LOG_TAG,Integer.toString(id));
-
-        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+       ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<ReviewsResponse> call = apiService.getReviews(id, BuildConfig.THE_MOVIE_DB_API_KEY);
         call.enqueue(new Callback<ReviewsResponse>() {
             @Override

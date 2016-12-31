@@ -5,14 +5,14 @@
     android:layout_height="match_parent"
     tools:context="com.fiery.dragon.popularmovies.MoviesFragment">
 
-    <GridView
-        android:id="@+id/moviesGridView"
+    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/movies_grid_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="0dp"
-        android:horizontalSpacing="0dp"
-        android:stretchMode="columnWidth">
-    </GridView>
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        app:layoutManager="LinearLayoutManager"
+        tools:listitem="@layout/list_item_movie" />
 
 </FrameLayout>

@@ -2,13 +2,13 @@
 <resources>
     <string-array name="pref_sort_order_options">
         <item>Popularity</item>
-        <item>Highest Rated</item>
+        <item>Top Rated</item>
         <item>Favorites</item>
     </string-array>
 
     <string-array name="pref_sort_order_values">
-        <item>popularity.desc</item>
-        <item>vote_count.desc</item>
+        <item>popular</item>
+        <item>top_rated</item>
         <item>favorites</item>
     </string-array>
 </resources>

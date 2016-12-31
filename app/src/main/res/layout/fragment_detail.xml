@@ -17,7 +17,8 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/detail_vertical_margin">
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -49,13 +50,6 @@
                         android:textAppearance="?android:textAppearanceLarge" />
 
                     <TextView
-                        android:id="@+id/movie_release_date_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-condensed"
-                        android:textAppearance="?android:textAppearanceMedium" />
-
-                    <TextView
                         android:id="@+id/movie_rating_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -69,36 +63,45 @@
             </LinearLayout>
 
             <TextView
-                android:text="@string/title_synopsis"
+                android:id="@+id/movie_release_date_text"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="@dimen/detail_vertical_margin"/>
+
 
             <TextView
                 android:id="@+id/movie_synopsis_text"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:text="@string/title_trailers"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content" />
+                android:fontFamily="sans-serif-condensed"
+                android:textAppearance="?android:textAppearanceMedium"
+                android:layout_marginBottom="@dimen/detail_vertical_margin"
+                />
+
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/trailers_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listItem="@layout/trailer_list_content"/>
+                tools:listItem="@layout/trailer_list_content"
+                android:layout_marginBottom="@dimen/detail_vertical_margin"/>
 
             <TextView
                 android:id="@+id/title_reviews"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content" />
+                android:layout_width="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:layout_marginBottom="@dimen/detail_vertical_margin"/>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/reviews_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
 
-        </LinearLayout>
+    </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

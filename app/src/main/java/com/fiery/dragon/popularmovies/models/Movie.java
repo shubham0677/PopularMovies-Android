@@ -2,98 +2,96 @@ package com.fiery.dragon.popularmovies.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import com.fiery.dragon.popularmovies.R;
 import com.google.gson.annotations.SerializedName;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by hp on 11/10/2016.
  */
 public class Movie implements Parcelable {
     @SerializedName("id")
-    private Integer id;
+    private Integer mId;
     @SerializedName("original_title")
-    private String originalTitle;
+    private String mOriginalTitle;
     @SerializedName("poster_path")
-    private String posterPath;
+    private String mPosterPath;
     @SerializedName("overview")
-    private String overview;
+    private String mOverview;
     @SerializedName("release_date")
-    private String releaseDate;
+    private String mReleaseDate;
     @SerializedName("vote_average")
-    private Double voteAverage;
+    private Double mVoteAverage;
+
+    public static final float POSTER_ASPECT_RATIO = 1.5f;
+    public static final String LOG_TAG = Movie.class.getSimpleName();
 
     public Movie(int id, String originalTitle, String posterPath, String overview,
                  String releaseDate, Double voteAverage) {
-        this.id = id;
-        this.originalTitle = originalTitle;
-        this.posterPath = posterPath;
-        this.overview = overview;
-        this.releaseDate = releaseDate;
-        this.voteAverage = voteAverage;
+        this.mId = id;
+        this.mOriginalTitle = originalTitle;
+        this.mPosterPath = posterPath;
+        this.mOverview = overview;
+        this.mReleaseDate = releaseDate;
+        this.mVoteAverage = voteAverage;
     }
 
     public Movie(Parcel parcel) {
-        id = parcel.readInt();
-        originalTitle = parcel.readString();
-        posterPath = parcel.readString();
-        overview = parcel.readString();
-        releaseDate = parcel.readString();
-        voteAverage = parcel.readDouble();
+        mId = parcel.readInt();
+        mOriginalTitle = parcel.readString();
+        mPosterPath = parcel.readString();
+        mOverview = parcel.readString();
+        mReleaseDate = parcel.readString();
+        mVoteAverage = parcel.readDouble();
     }
 
     public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+        return mId;
     }
 
     public String getPosterPath() {
-        return posterPath;
+        return mPosterPath;
     }
 
     public String getPosterUrl() {
-        return "http://image.tmdb.org/t/p/w500/" + posterPath;
-    }
-
-    public void setPosterPath(String posterPath) {
-        this.posterPath = posterPath;
+        return "http://image.tmdb.org/t/p/w500/" + mPosterPath;
     }
 
     public String getOverview() {
-        return overview;
-    }
-
-    public void setOverview(String overview) {
-        this.overview = overview;
+        return mOverview;
     }
 
     public String getReleaseDate() {
-        return releaseDate;
+        return mReleaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
+    public String getFormattedReleaseDate() {
+        String inputPattern = "yyyy-MM-dd";
+        SimpleDateFormat inputFormat = new SimpleDateFormat(inputPattern, Locale.US);
+            try {
+                Date date = inputFormat.parse(mReleaseDate);
+                return DateFormat.getDateInstance().format(date);
+            } catch (ParseException e) {
+                Log.e(LOG_TAG, "The Release date was not parsed successfully: " + mReleaseDate);
+            }
+        return mReleaseDate;
     }
 
     public String getOriginalTitle() {
-        return originalTitle;
-    }
-
-    public void setOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
+        return mOriginalTitle;
     }
 
     public Double getVoteAverage() {
-        return voteAverage;
-    }
-
-    public void setVoteAverage(Double voteAverage) {
-        this.voteAverage = voteAverage;
+        return mVoteAverage;
     }
 
     @Override
@@ -103,12 +101,12 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(id);
-        parcel.writeString(originalTitle);
-        parcel.writeString(posterPath);
-        parcel.writeString(overview);
-        parcel.writeString(releaseDate);
-        parcel.writeDouble(voteAverage);
+        parcel.writeInt(mId);
+        parcel.writeString(mOriginalTitle);
+        parcel.writeString(mPosterPath);
+        parcel.writeString(mOverview);
+        parcel.writeString(mReleaseDate);
+        parcel.writeDouble(mVoteAverage);
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {

@@ -11,7 +11,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/button_vertical_margin"
             android:text="@string/add_to_favorites"
-            android:theme="@style/Button.Red"
+            android:theme="@style/Button.Favorite"
             android:visibility="visible" />
 
         <Button
@@ -20,6 +20,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/button_vertical_margin"
             android:text="@string/remove_from_favorites"
-            android:theme="@style/Button.Red"
+            android:theme="@style/Button.Favorite"
             android:visibility="gone" />
     </LinearLayout>
