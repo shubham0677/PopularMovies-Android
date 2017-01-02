@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/26/2016.
+ */
+
 package com.fiery.dragon.popularmovies.data;
 
 import net.simonvt.schematic.annotation.AutoIncrement;
@@ -5,10 +9,6 @@ import net.simonvt.schematic.annotation.DataType;
 import net.simonvt.schematic.annotation.NotNull;
 import net.simonvt.schematic.annotation.PrimaryKey;
 import net.simonvt.schematic.annotation.Unique;
-
-/**
- * Created by hp on 11/26/2016.
- */
 
 public interface FavoritesColumns {
 

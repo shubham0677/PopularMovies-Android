@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/16/2016.
+ */
+
 package com.fiery.dragon.popularmovies.models;
 
 import android.os.Parcel;
@@ -15,12 +19,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Created by hp on 11/10/2016.
- */
 public class Movie implements Parcelable {
     @SerializedName("id")
-    private Integer mId;
+    private int mId;
     @SerializedName("original_title")
     private String mOriginalTitle;
     @SerializedName("poster_path")
@@ -58,8 +59,16 @@ public class Movie implements Parcelable {
         return mId;
     }
 
+    public void setId(int id) {
+        mId = id;
+    }
+
     public String getPosterPath() {
         return mPosterPath;
+    }
+
+    public void setPosterPath(String posterPath) {
+        mPosterPath = posterPath;
     }
 
     public String getPosterUrl() {
@@ -70,28 +79,44 @@ public class Movie implements Parcelable {
         return mOverview;
     }
 
+    public void setOverview(String overview) {
+        mOverview = overview;
+    }
+
     public String getReleaseDate() {
         return mReleaseDate;
     }
 
-    public String getFormattedReleaseDate() {
-        String inputPattern = "yyyy-MM-dd";
-        SimpleDateFormat inputFormat = new SimpleDateFormat(inputPattern, Locale.US);
-            try {
-                Date date = inputFormat.parse(mReleaseDate);
-                return DateFormat.getDateInstance().format(date);
-            } catch (ParseException e) {
-                Log.e(LOG_TAG, "The Release date was not parsed successfully: " + mReleaseDate);
-            }
-        return mReleaseDate;
+    public void setReleaseDate(String releaseDate) {
+        mReleaseDate = releaseDate;
     }
 
     public String getOriginalTitle() {
         return mOriginalTitle;
     }
 
+    public void setOriginalTitle(String originalTitle) {
+        mOriginalTitle = originalTitle;
+    }
+
     public Double getVoteAverage() {
         return mVoteAverage;
+    }
+
+    public void setVoteAverage(double voteAverage) {
+        mVoteAverage = voteAverage;
+    }
+
+    public String getFormattedReleaseDate() {
+        String inputPattern = "yyyy-MM-dd";
+        SimpleDateFormat inputFormat = new SimpleDateFormat(inputPattern, Locale.US);
+        try {
+            Date date = inputFormat.parse(mReleaseDate);
+            return DateFormat.getDateInstance().format(date);
+        } catch (ParseException e) {
+            Log.e(LOG_TAG, "The Release date was not parsed successfully: " + mReleaseDate);
+        }
+        return mReleaseDate;
     }
 
     @Override

@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/24/2016.
+ */
+
 package com.fiery.dragon.popularmovies.adapters;
 
 import android.content.Context;
@@ -14,15 +18,11 @@ import com.fiery.dragon.popularmovies.models.Review;
 
 import java.util.List;
 
-/**
- * Created by hp on 11/24/2016.
- */
-
 public class ReviewsAdapter
             extends RecyclerView.Adapter<ReviewsAdapter.ViewHolder> {
 
         private List<Review> mReviews;
-        final Context context;
+        final Context mContext;
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
@@ -39,7 +39,7 @@ public class ReviewsAdapter
         }
 
         public ReviewsAdapter(Context context, List<Review> items) {
-            this.context = context;
+            this.mContext = context;
             mReviews = items;
         }
 
@@ -60,7 +60,7 @@ public class ReviewsAdapter
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(review.getUrl())));
+                    mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(review.getUrl())));
                 }
             });
 

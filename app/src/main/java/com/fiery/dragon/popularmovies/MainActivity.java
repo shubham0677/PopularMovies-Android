@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/16/2016.
+ */
+
 package com.fiery.dragon.popularmovies;
 
 import android.content.Context;
@@ -18,12 +22,16 @@ import com.fiery.dragon.popularmovies.models.Movie;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.Callbacks{
 
+    private boolean mTwoPane;
+    private static final String DETAILFRAGMENT_TAG = "df_tag";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(!isOnline()) {
+        // Show a message and exit if device has no internet access.
+        if (!isOnline()) {
             AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 
             alertDialog.setTitle("Alert");
@@ -37,7 +45,13 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Cal
             });
             alertDialog.show();
         }
-     }
+
+        if (findViewById(R.id.movie_detail_container) != null) {
+            mTwoPane = true;
+        } else {
+            mTwoPane = false;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,6 +77,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Cal
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Checks if the device has internet access or not.
+     */
     public boolean isOnline() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -71,10 +88,27 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Cal
     }
 
 
+    /**
+     * In two pane mode, update the detail container with new detail fragment.
+     * In one pane mode, start the DetailActivity. @link(DetailActivity.class)
+     * @param movie
+     */
     @Override
-    public void open(Movie movie, int position) {
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra("movie",movie);
-        startActivity(intent);
+    public void onItemSelected(Movie movie) {
+        if(mTwoPane) {
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_MOVIE, movie);
+
+            DetailFragment detailFragment = new DetailFragment();
+            detailFragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, detailFragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra(DetailFragment.DETAIL_MOVIE, movie);
+            startActivity(intent);
+        }
     }
 }

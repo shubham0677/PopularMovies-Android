@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/26/2016.
+ */
+
 package com.fiery.dragon.popularmovies.data;
 
 import android.net.Uri;
@@ -6,11 +10,6 @@ import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
 import net.simonvt.schematic.annotation.InexactContentUri;
 import net.simonvt.schematic.annotation.TableEndpoint;
-
-/**
- * Created by hp on 11/26/2016.
- */
-
 
 @ContentProvider(authority = FavoritesProvider.AUTHORITY, database = FavoritesDatabase.class)
 public final class FavoritesProvider {
@@ -29,6 +28,7 @@ public final class FavoritesProvider {
         }
         return builder.build();
     }
+
     @TableEndpoint(table = FavoritesDatabase.FAVORITES)
     public static class Favorites {
         @ContentUri(

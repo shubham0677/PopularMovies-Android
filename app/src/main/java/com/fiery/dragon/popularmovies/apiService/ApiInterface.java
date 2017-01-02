@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/14/2016.
+ */
+
 package com.fiery.dragon.popularmovies.apiService;
 
 import com.fiery.dragon.popularmovies.models.MoviesResponse;
@@ -9,10 +13,6 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-
-/**
- * Created by hp on 11/14/2016.
- */
 
 public interface ApiInterface {
     @GET("{sort_by}")

@@ -1,11 +1,11 @@
+/**
+ * Created by Shubham on 11/26/2016.
+ */
+
 package com.fiery.dragon.popularmovies.data;
 
 import net.simonvt.schematic.annotation.Database;
 import net.simonvt.schematic.annotation.Table;
-
-/**
- * Created by hp on 11/26/2016.
- */
 
 @Database(version = FavoritesDatabase.VERSION)
 public final class FavoritesDatabase {

@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/8/2016.
+ */
+
 package com.fiery.dragon.popularmovies.adapters;
 
 import android.app.Activity;
@@ -25,18 +29,18 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by hp on 11/8/2016.
- */
-
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder> {
 
     private final ArrayList<Movie> mList;
     private final Callbacks mCallbacks;
-    private static final String LOG_TAG = MoviesAdapter.class.getSimpleName();
 
+    /**
+     * The callback interface will be implemented by the activity in which DetailFragment resides.
+     * It will define the action to take when a movie poster is tapped.
+    */
     public interface Callbacks {
-        void open(Movie movie, int position);
+
+        void onItemSelected(Movie movie);
     }
 
     public MoviesAdapter(Callbacks callbacks, ArrayList<Movie> movieList) {
@@ -50,6 +54,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
                 .inflate(R.layout.list_item_movie, parent, false);
         final Context context = view.getContext();
 
+        // Show 3 column grid on tablets and landscape mode, otherwise 2.
         int gridColsNumber = context.getResources()
                 .getInteger(R.integer.grid_number_cols);
 
@@ -65,8 +70,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
         final Movie movie = mList.get(position);
         final Context context = holder.mView.getContext();
 
-        holder.mMovie = movie;
-
         String posterUrl = movie.getPosterUrl();
 
         Picasso.with(context)
@@ -77,7 +80,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallbacks.open(movie, holder.getAdapterPosition());
+                mCallbacks.onItemSelected(movie);
             }
         });
 
@@ -92,7 +95,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         ImageView mThumbnailView;
-        public Movie mMovie;
 
         public ViewHolder(View view) {
             super(view);
@@ -101,20 +103,24 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
         }
     }
 
+    /**
+     * Add the movies from a list to adapter.
+     * @param movies
+     */
     public void add(List<Movie> movies) {
-        Log.d(LOG_TAG,"Adding movies from list");
         mList.clear();
-        Log.d(LOG_TAG,movies.get(0).getPosterPath());
         mList.addAll(movies);
         notifyDataSetChanged();
     }
 
+    /**
+     * Add the movies from database to adapter.
+     * @param cursor
+     */
     public void add(Cursor cursor) {
-        Log.d(LOG_TAG,"Adding movies from cursor");
         mList.clear();
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                Log.d(LOG_TAG,cursor.getString(cursor.getColumnIndex(FavoritesColumns.POSTER)));
                 Movie movie = new Movie(
                         cursor.getInt(cursor.getColumnIndex(FavoritesColumns.MOVIE_ID)),
                         cursor.getString(cursor.getColumnIndex(FavoritesColumns.NAME)),
@@ -132,6 +138,4 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
     public ArrayList<Movie> getMovies() {
         return mList;
     }
-
-
 }

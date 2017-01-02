@@ -1,48 +1,51 @@
+/**
+ * Created by Shubham on 11/16/2016.
+ */
+
 package com.fiery.dragon.popularmovies.models;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-
-/**
- * Created by hp on 11/14/2016.
- */
 public class MoviesResponse {
     @SerializedName("page")
-    private int page;
+    private int mPage;
+
     @SerializedName("results")
-    private List<Movie> results;
+    private List<Movie> mResults;
+
     @SerializedName("total_results")
-    private int totalResults;
+    private int mTotalResults;
+
     @SerializedName("total_pages")
-    private int totalPages;
+    private int mTotalPages;
 
     public int getPage() {
-        return page;
+        return mPage;
     }
 
     public void setPage(int page) {
-        this.page = page;
+        this.mPage = page;
     }
 
     public List<Movie> getResults() {
-        return results;
+        return mResults;
     }
 
-    public void setResults(List<Movie> results) {
-        this.results = results;
+    public void setResults(List<Movie> mResults) {
+        this.mResults = mResults;
     }
 
     public int getTotalResults() {
-        return totalResults;
+        return mTotalResults;
     }
 
     public void setTotalResults(int totalResults) {
-        this.totalResults = totalResults;
+        this.mTotalResults = totalResults;
     }
 
     public int getTotalPages() {
-        return totalPages;
+        return mTotalPages;
     }
 }

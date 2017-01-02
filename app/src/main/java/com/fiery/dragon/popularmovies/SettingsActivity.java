@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/16/2016.
+ */
+
 package com.fiery.dragon.popularmovies;
 
 import android.annotation.TargetApi;
@@ -8,10 +12,6 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-
-/**
- * Created by hp on 11/15/2016.
- */
 
 public class SettingsActivity extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
 

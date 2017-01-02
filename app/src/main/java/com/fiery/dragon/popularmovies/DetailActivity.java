@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/26/2016.
+ */
+
 package com.fiery.dragon.popularmovies;
 
 import android.content.Intent;
@@ -5,6 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+/**
+ * In one pane UI mode, this activity gets a movie from intent and sets it as argument on a detail
+ * fragment.
+ */
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -14,8 +23,15 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         if(savedInstanceState == null) {
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_MOVIE,
+                    getIntent().getParcelableExtra(DetailFragment.DETAIL_MOVIE));
+
+            DetailFragment detailFragment = new DetailFragment();
+            detailFragment.setArguments(args);
+
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.movie_detail_container, new DetailFragment())
+                    .add(R.id.movie_detail_container, detailFragment)
                     .commit();
         }
     }

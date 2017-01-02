@@ -1,5 +1,10 @@
+/**
+ * Created by Shubham on 11/16/2016.
+ */
+
 package com.fiery.dragon.popularmovies;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -30,17 +35,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private MoviesAdapter moviesAdapter;
+    private MoviesAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private String mSortOrder;
 
     private static final String MOVIES_LIST_KEY = "movies";
-    private static final String SELECTED_KEY = "selected_position";
     private static final String SORT_ORDER = "sort_order";
-    private static final String LOG_TAG = "MyLog";
     private static final String FAVORITES = "favorites";
     private static final int CURSOR_LOADER_ID = 0;
 
@@ -60,14 +62,14 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getResources().getInteger(R.integer.grid_number_cols)));
 
-        moviesAdapter = new MoviesAdapter((MoviesAdapter.Callbacks) getActivity(), new ArrayList<Movie>());
-        mRecyclerView.setAdapter(moviesAdapter);
+        mAdapter = new MoviesAdapter((MoviesAdapter.Callbacks) getActivity(), new ArrayList<Movie>());
+        mRecyclerView.setAdapter(mAdapter);
 
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_LIST_KEY)
                 && !savedInstanceState.getString(SORT_ORDER).equals(FAVORITES)) {
                 mSortOrder = savedInstanceState.getString(SORT_ORDER);
                 List<Movie> movies = savedInstanceState.getParcelableArrayList(MOVIES_LIST_KEY);
-                moviesAdapter.add(movies);
+                mAdapter.add(movies);
         }
         else {
             mSortOrder = checkSortOrder(getContext());
@@ -79,9 +81,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onResume() {
-        Log.d(LOG_TAG,"onResume");
         if(!mSortOrder.equals(checkSortOrder(getContext()))) {
-            Log.d(LOG_TAG,"onResume fetch");
             mSortOrder = checkSortOrder(getContext());
             fetchMovies(mSortOrder);
         }
@@ -91,10 +91,15 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(SORT_ORDER,mSortOrder);
-        outState.putParcelableArrayList(MOVIES_LIST_KEY, moviesAdapter.getMovies());
+        outState.putParcelableArrayList(MOVIES_LIST_KEY, mAdapter.getMovies());
         super.onSaveInstanceState(outState);
     }
 
+    /**
+     * Checks the app's current sort order against the one stored in SharedPreferences.
+     * @param context
+     * @return mSortOrder
+     */
     private String checkSortOrder(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(context.getString(R.string.pref_sort_order_key),
@@ -102,12 +107,21 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
+    /**
+     * Fetch the movies from MovieDbAPI using RetroFit, or, initialize loader if sort order set to
+     * favorites.
+     * @param sortOrder
+     */
     private void fetchMovies(String sortOrder) {
         if(sortOrder.equals(FAVORITES)) {
-            Log.d(LOG_TAG,"showingFromDatabase");
             getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
         }
         else {
+            final ProgressDialog mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setMessage("Fetching...");
+            mProgressDialog.show();
+
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
             Call<MoviesResponse> call =
                     apiService.getMovies(sortOrder, BuildConfig.THE_MOVIE_DB_API_KEY);
@@ -115,7 +129,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 @Override
                 public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
                     ArrayList<Movie> movies = (ArrayList) response.body().getResults();
-                    moviesAdapter.add(movies);
+                    Log.d("testing","fetching");
+                    mAdapter.add(movies);
+                    if (mProgressDialog.isShowing())
+                        mProgressDialog.dismiss();
                 }
 
                 @Override
@@ -137,7 +154,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        moviesAdapter.add(data);
+        mAdapter.add(data);
     }
 
     @Override

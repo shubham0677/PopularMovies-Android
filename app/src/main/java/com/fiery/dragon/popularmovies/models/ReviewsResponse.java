@@ -1,18 +1,19 @@
+/**
+ * Created by Shubham on 11/16/2016.
+ */
+
 package com.fiery.dragon.popularmovies.models;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Created by hp on 11/24/2016.
- */
-
 public class ReviewsResponse {
     @SerializedName("results")
-    private List<Review> results;
+    private List<Review> mResults;
 
     public List<Review> getResults() {
-        return results;
+        return mResults;
     }
+
 }

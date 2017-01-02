@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/27/2016.
+ */
+
 package com.fiery.dragon.popularmovies.adapters;
 
 import android.content.Context;
@@ -17,18 +21,15 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-/**
- * Created by hp on 11/27/2016.
- */
-
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHolder> {
 
     private List<Trailer> mTrailers;
+    public static final String TRAILER_URL_PREFIX = "http://www.youtube.com/watch?v=";
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
+        final View mView;
         ImageView mThumbnailView;
-        public Trailer mTrailer;
+        Trailer mTrailer;
 
         public ViewHolder(View view) {
             super(view);
@@ -53,18 +54,6 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
         final Trailer trailer = mTrailers.get(position);
         final Context context = holder.mView.getContext();
 
-//        float paddingLeft = 0;
-//        if (position == 0) {
-//            paddingLeft = context.getResources().getDimension(R.dimen.detail_horizontal_padding);
-//        }
-//
-//        float paddingRight = 0;
-//        if (position + 1 != getItemCount()) {
-//            paddingRight = context.getResources().getDimension(R.dimen.detail_horizontal_padding) / 2;
-//        }
-
-//        holder.mView.setPadding((int) paddingLeft, 0, (int) paddingRight, 0);
-
         holder.mTrailer = trailer;
 
         String thumbnailUrl = "http://img.youtube.com/vi/" + trailer.getSource() + "/0.jpg";
@@ -77,8 +66,7 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
             @Override
             public void onClick(View v) {
                 context.startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://www.youtube.com/watch?v=" + holder.mTrailer.getSource())));
-                Snackbar.make(v, holder.mTrailer.getSource(), Snackbar.LENGTH_SHORT).show();
+                        Uri.parse(TRAILER_URL_PREFIX + holder.mTrailer.getSource())));
             }
         });
     }
@@ -86,9 +74,5 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
     @Override
     public int getItemCount() {
         return mTrailers.size();
-    }
-
-    public Trailer getFirstTrailer() {
-        return mTrailers.get(0);
     }
 }

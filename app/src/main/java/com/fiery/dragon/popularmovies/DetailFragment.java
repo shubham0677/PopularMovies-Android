@@ -1,3 +1,7 @@
+/**
+ * Created by Shubham on 11/16/2016.
+ */
+
 package com.fiery.dragon.popularmovies;
 
 import android.content.ContentValues;
@@ -21,6 +25,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.fiery.dragon.popularmovies.adapters.MoviesAdapter;
 import com.fiery.dragon.popularmovies.adapters.TrailersAdapter;
 import com.fiery.dragon.popularmovies.adapters.ReviewsAdapter;
 import com.fiery.dragon.popularmovies.apiService.ApiClient;
@@ -40,22 +45,18 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Created by Shubham on 11/16/2016.
- */
-
 public class DetailFragment extends Fragment {
 
     private Movie mMovie;
-    private Trailer shareTrailer;
+    private Trailer mShareTrailer;
 
-    private ImageView moviePoster;
+    private ImageView mPoster;
     private RecyclerView mTrailersRecyclerView, mReviewsRecyclerView;
-    private TextView movieTitle,movieReleaseDate,movieRating,movieSynopsis,reviewsTitle;
+    private TextView mTitle,mReleaseDate,mRating,mSynopsis,mNoReviews;
     private Button mButtonAddToFavorites, mButtonRemoveFromFavorites;
     private ShareActionProvider mShareActionProvider;
 
-    private static final String LOG_TAG = DetailFragment.class.getSimpleName();
+    public static final String DETAIL_MOVIE = "detail_movie";
 
     public DetailFragment() {
         setHasOptionsMenu(true);
@@ -66,33 +67,27 @@ public class DetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        Intent intent = getActivity().getIntent();
-        mMovie = intent.getParcelableExtra("movie");
+        Bundle args = getArguments();
+        if(args != null) {
+            mMovie = args.getParcelable(DETAIL_MOVIE);
+        }
 
-        moviePoster = (ImageView) rootView.findViewById(R.id.movie_poster_image);
-        movieTitle = (TextView) rootView.findViewById(R.id.movie_title_text);
-        movieReleaseDate = (TextView) rootView.findViewById(R.id.movie_release_date_text);
-        movieRating = (TextView) rootView.findViewById(R.id.movie_rating_text);
-        movieSynopsis = (TextView) rootView.findViewById(R.id.movie_synopsis_text);
-        reviewsTitle = (TextView) rootView.findViewById(R.id.title_reviews);
+        mPoster = (ImageView) rootView.findViewById(R.id.movie_poster_image);
+        mTitle = (TextView) rootView.findViewById(R.id.movie_title_text);
+        mReleaseDate = (TextView) rootView.findViewById(R.id.movie_release_date_text);
+        mRating = (TextView) rootView.findViewById(R.id.movie_rating_text);
+        mSynopsis = (TextView) rootView.findViewById(R.id.movie_synopsis_text);
+        mNoReviews = (TextView) rootView.findViewById(R.id.no_reviews);
         mButtonAddToFavorites = (Button) rootView.findViewById(R.id.button_add_to_favorites);
         mButtonRemoveFromFavorites =
                 (Button) rootView.findViewById(R.id.button_remove_from_favorites);
 
-        if(intent != null) {
-            if (intent.hasExtra("favorite")) {
-                Picasso.with(getContext()).load(mMovie.getPosterPath()).into(moviePoster);
-            } else {
-                Picasso.with(getContext()).load(mMovie.getPosterUrl()).into(moviePoster);
-            }
-        }
+        Picasso.with(getContext()).load(mMovie.getPosterUrl()).into(mPoster);
 
-        updateFavoriteButtons();
-
-        movieTitle.setText(mMovie.getOriginalTitle());
-        movieRating.setText(String.format(getString(R.string.format_movie_rating),mMovie.getVoteAverage()));
-        movieReleaseDate.setText(String.format(getString(R.string.format_release_date),mMovie.getFormattedReleaseDate()));
-        movieSynopsis.setText(mMovie.getOverview());
+        mTitle.setText(mMovie.getOriginalTitle());
+        mRating.setText(String.format(getString(R.string.format_movie_rating),mMovie.getVoteAverage()));
+        mReleaseDate.setText(String.format(getString(R.string.format_release_date),mMovie.getFormattedReleaseDate()));
+        mSynopsis.setText(mMovie.getOverview());
 
         mTrailersRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_list_view);
         mReviewsRecyclerView = (RecyclerView) rootView.findViewById(R.id.reviews_list_view);
@@ -106,6 +101,8 @@ public class DetailFragment extends Fragment {
                 = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         mReviewsRecyclerView.setLayoutManager(layoutManager);
 
+
+        updateFavoriteButtons();
         getTrailers(mMovie.getId());
         getReviews(mMovie.getId());
 
@@ -119,16 +116,20 @@ public class DetailFragment extends Fragment {
         MenuItem menuItem = menu.findItem(R.id.action_share);
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
 
-        if(shareTrailer != null) {
+        if(mShareTrailer != null) {
             mShareActionProvider.setShareIntent(createShareTrailerIntent());
         }
     }
 
+    /**
+     * Create the intent to share trailer url.
+     */
     private Intent createShareTrailerIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_SUBJECT,mMovie.getOriginalTitle());
-        shareIntent.putExtra(Intent.EXTRA_TEXT,shareTrailer.getName() + ": " + shareTrailer.getUrl());
+        shareIntent.putExtra(Intent.EXTRA_TEXT,mMovie.getOriginalTitle() + " "
+                + mShareTrailer.getName() + ": " + mShareTrailer.getUrl());
         return shareIntent;
     }
 
@@ -148,6 +149,9 @@ public class DetailFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Show favorite button (add or remove)
+     */
     private void updateFavoriteButtons() {
         if (isFavorite()) {
             mButtonRemoveFromFavorites.setVisibility(View.VISIBLE);
@@ -173,6 +177,10 @@ public class DetailFragment extends Fragment {
                 });
     }
 
+    /**
+     * Query database to check if this movie is already a favorite or not.
+     * @return
+     */
     private boolean isFavorite() {
         Cursor cursor = getContext().getContentResolver().query(
                 FavoritesProvider.Favorites.CONTENT_URI,
@@ -186,6 +194,9 @@ public class DetailFragment extends Fragment {
         return false;
     }
 
+    /**
+     * Add movie to favorites table.
+     */
     private void addToFavorites() {
         ContentValues cv = new ContentValues();
                     cv.put(FavoritesColumns.MOVIE_ID, mMovie.getId());
@@ -199,12 +210,19 @@ public class DetailFragment extends Fragment {
                     Snackbar.make(getView(), "Added to favorites", Snackbar.LENGTH_SHORT).show();
     }
 
+    /**
+     * Remove movie from favorites table.
+     */
     private  void removeFromFavorites() {
         getContext().getContentResolver().delete(FavoritesProvider.Favorites.CONTENT_URI,
                 FavoritesColumns.MOVIE_ID + " = " + mMovie.getId(), null);
         updateFavoriteButtons();
     }
 
+    /**
+     * Get trailers information based on movie id using RetroFit.
+     * @param id
+     */
     private void getTrailers(int id) {
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<TrailersResponse> call = null;
@@ -213,7 +231,7 @@ public class DetailFragment extends Fragment {
             @Override
             public void onResponse(Call<TrailersResponse> call, Response<TrailersResponse> response) {
                 List<Trailer> trailersList = response.body().getResults();
-                shareTrailer = trailersList.get(0);
+                mShareTrailer = trailersList.get(0);
                 TrailersAdapter trailersAdapter =
                         new TrailersAdapter(getActivity(), trailersList);
                 mTrailersRecyclerView.setAdapter(trailersAdapter);
@@ -227,6 +245,10 @@ public class DetailFragment extends Fragment {
         });
     }
 
+    /**
+     * Get reviews based on movie id using RetroFit.
+     * @param id
+     */
     private void getReviews(int id) {
        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<ReviewsResponse> call = apiService.getReviews(id, BuildConfig.THE_MOVIE_DB_API_KEY);
@@ -235,7 +257,7 @@ public class DetailFragment extends Fragment {
             public void onResponse(Call<ReviewsResponse> call, Response<ReviewsResponse> response) {
                 List<Review> reviewsList = response.body().getResults();
                 if (reviewsList.size() > 0) {
-                    reviewsTitle.setText("Reviews");
+                    mNoReviews.setVisibility(View.GONE);
                     ReviewsAdapter reviewsAdapter =
                             new ReviewsAdapter(getActivity(), reviewsList);
                     mReviewsRecyclerView.setAdapter(reviewsAdapter);

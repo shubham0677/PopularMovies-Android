@@ -4,6 +4,7 @@
     android:id="@+id/movie_detail_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.fiery.dragon.popularmovies.DetailActivity">
+    tools:context="com.fiery.dragon.popularmovies.DetailActivity"
+    tools:ignore="MergeRootFrame">
 
 </FrameLayout>
