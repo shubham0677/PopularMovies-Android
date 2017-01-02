@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.fiery.dragon.popularmovies.adapters.MoviesAdapter;
 import com.fiery.dragon.popularmovies.apiService.ApiClient;
@@ -39,12 +40,15 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     private MoviesAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private TextView mNoFavorites;
     private String mSortOrder;
 
     private static final String MOVIES_LIST_KEY = "movies";
     private static final String SORT_ORDER = "sort_order";
     private static final String FAVORITES = "favorites";
-    private static final int CURSOR_LOADER_ID = 0;
+    public static final int CURSOR_LOADER_ID = 0;
+
+    private static final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
 
     public MoviesFragment() {    }
@@ -61,6 +65,9 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid_view);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getResources().getInteger(R.integer.grid_number_cols)));
+
+        mNoFavorites = (TextView) rootView.findViewById(R.id.no_favorites);
+        mNoFavorites.setVisibility(View.GONE);
 
         mAdapter = new MoviesAdapter((MoviesAdapter.Callbacks) getActivity(), new ArrayList<Movie>());
         mRecyclerView.setAdapter(mAdapter);
@@ -81,6 +88,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onResume() {
+        Log.d(LOG_TAG,"onResume " + mSortOrder + " " + checkSortOrder(getContext()));
         if(!mSortOrder.equals(checkSortOrder(getContext()))) {
             mSortOrder = checkSortOrder(getContext());
             fetchMovies(mSortOrder);
@@ -122,6 +130,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
             mProgressDialog.setMessage("Fetching...");
             mProgressDialog.show();
 
+            mNoFavorites.setVisibility(View.GONE);
+
+            getLoaderManager().destroyLoader(CURSOR_LOADER_ID);
+
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
             Call<MoviesResponse> call =
                     apiService.getMovies(sortOrder, BuildConfig.THE_MOVIE_DB_API_KEY);
@@ -129,7 +141,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 @Override
                 public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
                     ArrayList<Movie> movies = (ArrayList) response.body().getResults();
-                    Log.d("testing","fetching");
+                    Log.d(LOG_TAG,"fetching");
                     mAdapter.add(movies);
                     if (mProgressDialog.isShowing())
                         mProgressDialog.dismiss();
@@ -154,11 +166,18 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.add(data);
+        if(data != null && data.moveToFirst()) {
+            mAdapter.add(data);
+        }
+        else {
+            mAdapter.clearAdapter();
+            mNoFavorites.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(LOG_TAG,"loader reset");
     }
 
 }
