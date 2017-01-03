@@ -15,4 +15,4 @@ Paste it in gradle.properties file as the value of MyMovieDbAApiKey.
 
 ## Screens
 
-![alt tag] (https://github.com/shubham0677/PopularMoviesApp/blob/master/screenshots/Screenshot_20170102-182816.png =100x20)
+![img] (https://github.com/shubham0677/PopularMoviesApp/blob/master/screenshots/Screenshot_20170102-182816.png)
